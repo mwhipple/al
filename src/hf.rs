@@ -6,6 +6,7 @@
 use hf_hub::{HFClient, HFError};
 use hf_hub::progress::{DownloadEvent, ProgressEvent, ProgressHandler};
 use indicatif::{ProgressBar, ProgressState, ProgressStyle};
+use std::fmt;
 use std::{fmt::Write};
 use std::path::PathBuf;
 
@@ -19,8 +20,16 @@ pub struct HFModel<'a> {
         pub file: &'a str,
 }
 
+/// Render the model info in a form used by hf cli.
+impl<'a> fmt::Display for HFModel<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}/{}:{}", self.owner, self.repo, self.file)
+    }
+}
+
 /// Return the local path for the provided model, downloading as needed.
 pub async fn path_for_hf_model(model: &HFModel<'_>) -> Result<PathBuf, HFError> {
+    println!("Resolving {}", model);
     HFClient::new()?
             .model(model.owner, model.repo)
             .download_file()

@@ -16,6 +16,7 @@ name = "al"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "encoding_rs",
  "hf-hub",
  "indicatif",
  "llama-cpp-2",
