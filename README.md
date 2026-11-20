@@ -15,6 +15,10 @@ execution, avoiding lock-in, and ethical concerns
 (impacts to the environment and not feeding the data center
 monster) I strongly prefer local inference.
 
+Unfortunately (but predictably both for adoption overhead and
+typical incentive-alignment), the vast majority of the current
+tooling and documentation is oriented remote interactions.
+
 ### Tool Choice
 
 My tool choice is largely driven by the above, alongside
@@ -53,7 +57,9 @@ things seem to run faster through the CLI.
 As mentioned on my [website](https://www.mattwhipple.com),
 I've recently broken down and become a Rustacean, and therefore
 that will be the primarily used language. Certainly Python
-or JavaScript may be more aligned with specific goals, but
+or JavaScript may be more aligned with specific goals, and while
+I've had good luck throwing together some assistants in Python
+(using LangChain and subsequently llama-cpp-python)
 honing my Rust skills should help with wider pursuits and for
 this effort in particular also helps with...
 
@@ -62,9 +68,9 @@ this effort in particular also helps with...
 Goose is the agent framework that I'm tentatively planning on
 investing in. It provides a nice package to hit the ground
 running, and I'll be digging in under the hood and either
-making use of the GDK, or just getting up-to-speed on the
+making use of the GDK (apparently just renamed to oi-kit),
+or just getting up-to-speed on the
 main applications.
-
 Goose has relatively recently added support for local
 `llama.cpp`, but _right now_ the support has fallen
 a bit behind with a seemingly
@@ -76,6 +82,24 @@ is in the mix versus using llama.cpp directly.
 Ultimately this leads me to the idea that while I
 tentatively want to adopt Goose, I also want to be ready
 to work with it rather than just use it.
+
+## Performance and Monitoring
+
+Given that one of my goals is local inference (and that I don't
+plan on throwing a bunch of money at hardware), performance becomes
+particularly important as it can directly impact usability
+(rather than just cost). Some of the optimal selections are also
+likely to vary across local vs. hosted inference (an extension
+of the server vs. spawned process delineation above) - particularly
+due to how some of the pieces may interact and introduce
+tragedies of the commons.
+
+I will therefore be spending some time throughout to make sure
+that I have a decent picture of what aspects may be worth
+paying attention to and documenting that here.
+
+I'm initially building this on a Macbook, so I'll start with
+Instruments (using https://github.com/cmyr/cargo-instruments).
 
 ## Work
 
@@ -106,3 +130,19 @@ using default parameters.
 - HF: List model and maybe vary output for download vs. cache
       This could likely be determined by 0 total bytes
 - Clean up streams/silence is golden
+
+## References
+
+- https://github.com/ggml-org/llama.cpp
+  A lightweight and highly tunable llm runtime
+- https://github.com/utilityai/llama-cpp-rs
+  Rust bindings for llama.cpp
+  - https://github.com/utilityai/llama-cpp-rs/blob/main/examples/simple/src/main.rs
+    This code is starting from this.
+- https://goose-docs.ai/
+  An open source agent harness - this currently supports llama.cpp
+  but the performance drops notably
+- https://learning.oreilly.com/library/view/an-illustrated-guide/9798341662681/
+  This book does a notably nice job with a good mix of conceptual and
+  practical information. To start I'll likely be building a system based on
+  its TinyAgent, but with the stack described above.
