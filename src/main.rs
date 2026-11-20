@@ -7,16 +7,14 @@ use llama_cpp_2::model::params::LlamaModelParams;
 use llama_cpp_2::sampling::LlamaSampler;
 use std::io::Write;
 
+mod cfg;
 mod hf;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Resolve the model file.
-    let model_info = hf::HFModel {
-        owner: "unsloth",
-        repo: "Devstral-Small-2-24B-Instruct-2512-GGUF",
-        file: "Devstral-Small-2-24B-Instruct-2512-UD-IQ1_M.gguf",
-    };
+    // Resolve the model file - the path should be loaded from an envvar.
+    let cfg = cfg::from_path("config.ini")?;
+    let model_info = cfg.model_info();
     let model_path = hf::path_for_hf_model(&model_info).await?;
     let model_params = LlamaModelParams::default();
 

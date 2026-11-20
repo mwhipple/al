@@ -11,29 +11,29 @@ use std::{fmt::Write};
 use std::path::PathBuf;
 
 /// Identify a HuggingFace Model
-pub struct HFModel<'a> {
+pub struct HFModel {
         /// the repo owner. e.g. `TheBloke`
-        pub owner: &'a str,
+        pub owner: String,
         /// the repo containing the model. e.g. `Llama-2-7B-Chat-GGUF`
-        pub repo: &'a str,
+        pub repo: String,
         /// the model name. e.g. `llama-2-7b-chat.Q4_K_M.gguf`
-        pub file: &'a str,
+        pub file: String,
 }
 
 /// Render the model info in a form used by hf cli.
-impl<'a> fmt::Display for HFModel<'a> {
+impl fmt::Display for HFModel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}/{}:{}", self.owner, self.repo, self.file)
     }
 }
 
 /// Return the local path for the provided model, downloading as needed.
-pub async fn path_for_hf_model(model: &HFModel<'_>) -> Result<PathBuf, HFError> {
+pub async fn path_for_hf_model(model: &HFModel) -> Result<PathBuf, HFError> {
     println!("Resolving {}", model);
     HFClient::new()?
-            .model(model.owner, model.repo)
+            .model(&model.owner, &model.repo)
             .download_file()
-            .filename(model.file)
+            .filename(&model.file)
             .progress(console_handler())
             .send()
             .await
