@@ -1,6 +1,6 @@
 # al
 
-My AI assistant and general work.
+My AI assistant and general AI work.
 
 ## General Background
 
@@ -88,3 +88,8 @@ The first pass is a basic one to get the ball rolling...
 interact with llama.cpp using the Rust bindings
 at https://github.com/utilityai/llama-cpp-rs
 (also used by Goose).
+
+## Laundry
+
+- Optionally provide notice about HuggingFace token
+

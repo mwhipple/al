@@ -1,0 +1,11 @@
+[package]
+name = "al"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = { version = "1.0" }
+hf-hub = { version = "1.0" }
+llama-cpp-2 = { version = "0.1.161" }
+tokio = { version = "1.54.1" }
+indicatif = { version = "0.18.6" }
