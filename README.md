@@ -119,17 +119,13 @@ This is currently working very roughly.
 I'll be concurrently tidying this up and building out more of
 a harness.
 
-One glaring issue right now is that the model outputs become
-quickly non-sensical which is plausibly a result of just
-using default parameters.
-
 ## Laundry
 
-- Support loading model info from parameter
 - HF: Optionally provide notice about HuggingFace token
 - HF: List model and maybe vary output for download vs. cache
       This could likely be determined by 0 total bytes
 - Clean up streams/silence is golden
+- Provide initial TUI (with inquire?)
 
 ## References
 

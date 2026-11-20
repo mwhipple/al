@@ -7,7 +7,9 @@
 use anyhow::{anyhow, Result};
 use configparser::ini::Ini;
 use crate::hf;
+use std::num::NonZero;
 use std::path::Path;
+
 
 pub struct Config {
     config: Ini,
@@ -22,6 +24,12 @@ impl Config {
             repo: self.config.get("model", "repo").unwrap(),
             file: self.config.get("model", "file").unwrap(),
         }
+    }
+
+    pub fn context_size(&self) -> Option<NonZero<u32>> {
+        self.config.getuint("context", "size").unwrap()
+            .and_then(|size| NonZero::new(size as u32))
+
     }
 }
 

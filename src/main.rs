@@ -27,11 +27,11 @@ async fn main() -> Result<()> {
     let model = LlamaModel::load_from_file(&backend, model_path, &model_params)?;
 
     // Initialize the context.
-    let ctx_params = LlamaContextParams::default();
+    let ctx_params = LlamaContextParams::default().with_n_ctx(cfg.context_size());
     let mut ctx = model.new_context(&backend, ctx_params)?;
 
     // Deal with a prompt.
-    let prompt = "Hello, Al!";
+    let prompt = "Hello, can you tell me what time it is?";
     let tokens_list = model.vocab().tokenize(prompt.as_bytes(), true, true);
     // Check kv cache...skipping for now.
 
