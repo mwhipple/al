@@ -1,0 +1,31 @@
+name: Deploy Documentation as GitHub Pages
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      pages: write
+    steps:
+    - name: Checkout the branch
+      uses: actions/checkout@v7
+    - name: Setup rust
+      uses: actions-rust-lang/setup-rust-toolchain@v2
+    - name: Generate docs
+      run: cargo doc --no-deps
+    - name: Generate landing
+      run: echo '<meta http-equiv="refresh" content="0; url=al/index.html">' > target/doc/index.html
+    - name: Configure GitHub Pages
+      uses: actions/configure-pages@v6
+    - name: Upload GitHub Pages artifact
+      uses: actions/upload-pages-artifact@v5
+      with:
+        path: target/doc
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v5
