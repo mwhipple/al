@@ -98,9 +98,9 @@ fn stdin_lines() -> tokio::sync::mpsc::Receiver<io::Result<String>> {
 /// Provide a [Sinker] to render output in the CLI.
 ///
 /// A Rendererer produces a Renderer.
-pub struct Renderer;
+pub struct Rendererer;
 
-impl Sinker for Renderer {
+impl Sinker for Rendererer {
     fn sink(
         &self,
         mut rx: UnboundedReceiver<AgentEvent>,
