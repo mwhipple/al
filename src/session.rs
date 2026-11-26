@@ -13,7 +13,11 @@
 //! This started off as cribbing from `ngrc`, but elides
 //! the store construct to reduce the conceptual overhead.
 //! Persistence could be added through some form of decoration.
+//!
+//! In the current state this could be folded into the `runtime`
+//! module, but is left separate for future persistency.
 
+//! This module is locally a leaf.
 use oi_kit_agent::machine::MachineSession;
 use oi_kit_providers::{
     base::Provider,

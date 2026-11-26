@@ -9,6 +9,8 @@
 
 use anyhow::{anyhow, Result};
 use configparser::ini::Ini;
+
+/// This module pulls in [hf] to support model retrieval.
 use crate::hf;
 use std::num::NonZero;
 use std::path::Path;
