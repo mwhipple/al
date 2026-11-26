@@ -24,14 +24,10 @@ use oi_kit_providers::{
     conversation::{
         Conversation,
         message::Message,
-        token_usage::ProviderUsage,
     },
     model::ModelConfig,
 };
-use std::{
-    sync::{Arc, Mutex},
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
 /// Capture some of the more mutable data and align with some traits.
@@ -42,8 +38,6 @@ pub struct Session {
     conversation: Conversation,
     /// Record the identifier for the execution (to support [MachineSession]).
     pub id: String,
-    /// Track usage information.
-    usage: Vec<ProviderUsage>,
 }
 
 /// Capture the execution environment.
@@ -54,11 +48,6 @@ pub struct Session {
 /// The provide will use a dynamic reference to match
 /// signatures in oi-kit
 pub struct ExecutionEnvironment {
-    /// Record the epoch time when this environment was started.
-    created_at: u64,
-    /// Uniquely identify this execution.
-    /// This is tracked here to allow unlocked access.
-    id: String,
     /// Record the model configuration used for the session.
     model_config: ModelConfig,
     /// Provide access to the provider used for this execution.
@@ -73,14 +62,11 @@ impl ExecutionEnvironment {
     pub fn start_session<P: Provider + 'static>(provider: P, model_config: ModelConfig) -> Self {
         let id = Uuid::new_v4().to_string();
         ExecutionEnvironment {
-            created_at: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
             model_config,
-            id: id.clone(),
             provider: Arc::new(provider),
             session: Arc::new(Mutex::new(Session {
                 conversation: Conversation::empty(),
                 id,
-                usage: Vec::new(),
             })),
         }
     }
