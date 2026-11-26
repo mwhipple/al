@@ -7,11 +7,11 @@
 //! Usage will primarily revolve around instantation of
 //! a [Config] and then calling appropriate methods on that instance.
 
-use anyhow::{anyhow, Result};
-use configparser::ini::Ini;
-
 /// This module pulls in [hf] to support model retrieval.
 use crate::hf;
+
+use anyhow::{anyhow, Result};
+use configparser::ini::Ini;
 use std::num::NonZero;
 use std::path::Path;
 
