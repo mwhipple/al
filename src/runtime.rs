@@ -147,16 +147,30 @@ impl<S: Sinker> Runtime<S> {
 }
 
 /// Make Usable by the [StateMachine].
+///
+/// The session parameter provided is ummutable, and therefore
+/// can inform initial guards but not subsequent operations.
 #[async_trait]
 impl<S: Sinker> EffectHandler<Session, Effect> for Runtime<S> {
+    /// Reocrd received messages.
     async fn apply_effects(
         &self,
         session: &Session,
-        _effects: &mut [Effect],
+        effects: &mut [Effect],
         _: &Emitter,
     ) -> Result<()> {
         if session.id != self.exec.session().lock().unwrap().id {
             bail!("effects belong to a different session");
+        }
+
+        let session = self.exec.session();
+        for effect in effects {
+            match effect {
+                Effect::Message(message) => {
+                        session.lock().unwrap().append_message(message.clone());
+                },
+                _ => {},
+            }
         }
         Ok(())
     }
@@ -184,8 +198,8 @@ fn agent(
     StateMachine::new(
         vec![
             Step::Inference(Arc::new(
-            InferenceRunner::<Session, Effect>::new(provider, model)
-                .with_request_preparer(Arc::new(RequestContext { system_prompt: "You are a helpful agent".to_string() })),
+                InferenceRunner::<Session, Effect>::new(provider, model)
+                    .with_request_preparer(Arc::new(RequestContext { system_prompt: "You are a helpful agent".to_string() })),
         )),
         ],
         cancel,

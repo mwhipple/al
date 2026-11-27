@@ -16,7 +16,13 @@
 //!
 //! In the current state this could be folded into the `runtime`
 //! module, but is left separate for future persistency.
-
+//!
+//! As implied below, this is used by the oi-kit StateMachine,
+//! and specifically seems to inform some of the state transitions.
+//! The specifics of this should be documented as it is discovered,
+//! but the immediate takeaway is that session is logically
+//! significant and should be kept in decent shape.
+//!
 //! This module is locally a leaf.
 use oi_kit_agent::machine::MachineSession;
 use oi_kit_providers::{
@@ -38,6 +44,12 @@ pub struct Session {
     conversation: Conversation,
     /// Record the identifier for the execution (to support [MachineSession]).
     pub id: String,
+}
+impl Session {
+    /// Apply the provided `message` to the session.
+    pub fn append_message(&mut self, message: Message) {
+        self.conversation.push(message.with_generated_id_if_missing());
+    }
 }
 
 /// Capture the execution environment.
@@ -73,7 +85,7 @@ impl ExecutionEnvironment {
 
     /// Apply the provided `message` to the contained session.
     pub fn append_message(&mut self, message: Message) {
-        self.session.lock().unwrap().conversation.push(message.with_generated_id_if_missing());
+        self.session.lock().unwrap().append_message(message);
     }
 
     /// Provide the configured model config.
