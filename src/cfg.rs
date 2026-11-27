@@ -49,4 +49,9 @@ impl Config {
             .and_then(|size| NonZero::new(size as u32))
 
     }
+
+    /// Return the system prompt.
+    pub fn system_prompt(&self) -> Option<String> {
+        self.config.get("harness", "system_prompt")
+    }
 }

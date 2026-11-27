@@ -33,6 +33,7 @@ use tokio_util::sync::CancellationToken;
 ///
 /// This can presumably capture some background information and some
 /// augmentation for user messages.
+#[derive(Debug)]
 struct RequestContext {
     /// Provide the system prompt to pass to the model.
     system_prompt: String,
@@ -48,8 +49,9 @@ impl InferenceRequestPreparer<Session> for RequestContext {
         _: &Conversation,
         input: InferenceInput,
     ) -> Result<PreparedInferenceRequest> {
+        let system_prompt = self.system_prompt.clone();
         Ok(PreparedInferenceRequest {
-            system_prompt: self.system_prompt.clone(),
+            system_prompt,
             tools: input.tools,
             additional_messages: vec![],
         })
@@ -111,6 +113,8 @@ pub struct Runtime<S: Sinker> {
     cancel: CancellationToken,
     /// Provide access to the session across threads.
     exec: ExecutionEnvironment,
+    /// Record the context that will be used for generation.
+    request_context: Arc<RequestContext>,
     /// Store a strategy for producing an event sink.
     sinker: S,
 }
@@ -120,8 +124,10 @@ impl<S: Sinker> Runtime<S> {
           cancel: CancellationToken,
           exec: ExecutionEnvironment,
           sinker: S,
+          system_prompt: String,
     ) -> Self {
-        Runtime { cancel, exec, sinker }
+        let request_context = Arc::new(RequestContext { system_prompt });
+        Runtime { cancel, exec, sinker, request_context }
     }
 
     /// Produce a snapshot of the contained Session.
@@ -138,7 +144,7 @@ impl<S: Sinker> Runtime<S> {
         let emitter = Emitter::new(tx, self.cancel.clone());
         let sink = self.sinker.sink(rx);
         let id = self.session_snapshot().id;
-        let machine = agent(self.exec.provider(), self.exec.model_config(), self.cancel.clone());
+        let machine = agent(self.exec.provider(), self.exec.model_config(), self.cancel.clone(), self.request_context.clone());
         let _result = machine.run(self, &id, &emitter).await;
         drop(emitter);
         let _ = sink.await?;
@@ -194,12 +200,13 @@ fn agent(
      provider: Arc<dyn Provider>,
      model: ModelConfig,
      cancel: CancellationToken,
+     request_context: Arc<RequestContext>,
 ) -> StateMachine<'static, Session, Effect> {
     StateMachine::new(
         vec![
             Step::Inference(Arc::new(
                 InferenceRunner::<Session, Effect>::new(provider, model)
-                    .with_request_preparer(Arc::new(RequestContext { system_prompt: "You are a helpful agent".to_string() })),
+                    .with_request_preparer(request_context),
         )),
         ],
         cancel,

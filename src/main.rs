@@ -88,6 +88,7 @@ async fn main() -> Result<()> {
         cancel.clone(),
         session::ExecutionEnvironment::start_session(provider, model_config),
         cli::Rendererer,
+        cfg.system_prompt().unwrap_or("You are a helpful assistant".to_string()),
     );
     cli::cli_input(runtime, cancel.clone()).await?;
     Ok(())

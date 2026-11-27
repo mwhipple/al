@@ -33,7 +33,9 @@ pub trait MessageStringifier {
 struct SimpleStringifier;
 impl MessageStringifier for SimpleStringifier {
     fn stringify(&self, req: &GenerationRequest<SimpleStringifier>) -> String {
-        req.messages.iter().map(Message::as_concat_text).collect::<Vec<_>>().join("\n")
+        let mut output = vec![format!("SYSTEM: {}", req.system_prompt)];
+        output.extend(req.messages.iter().map(Message::as_concat_text));
+        output.join("\n")
     }
 }
 
@@ -45,6 +47,8 @@ pub struct GenerationRequest<'a, S: MessageStringifier> {
     messages: &'a [Message],
     /// Provide the strategy through which messages will be serialized to text.
     stringifier: S,
+    /// Provide the system prompt.
+    system_prompt: String,
     /// Store the sender through which responses should be emitted.
     pub tx: &'a Sender<Result<(Option<Message>, Option<ProviderUsage>), ProviderError>>,
 }
@@ -93,26 +97,32 @@ impl<G: Generator + 'static> Provider for DelegatingProvider<G> {
         &self.name
     }
 
-    /// Stream the responses for the provided `messages`.
+    /// Stream the responses for the provided `messages` and `system` prompt.
     ///
+    /// The system prompt is passed through from the InferenceRequestParameter provided in [crate::runtime]
     /// This provides a lot of the supporting control flow and context propagation.
     /// This can also handle some of the underlying state management and verification.
     async fn stream(
         &self,
         _model_config: &ModelConfig,
-        _system: &str,
+        system: &str,
         messages: &[Message],
         _tools: &[Tool],
     ) -> Result<MessageStream, ProviderError> {
         let (tx, mut rx) = tokio::sync::mpsc::channel::<Result<(Option<Message>, Option<ProviderUsage>), ProviderError>>(32);
         let generator = self.generator.clone();
         let messages = messages.to_vec();
+        let system_prompt = system.to_string();
         tokio::spawn(async move {
             tokio::task::spawn_blocking(move || {
-                    let request = GenerationRequest{messages: &messages, stringifier: SimpleStringifier, tx: &tx};
-                    let _ = generator.generate(request);
-                });
-
+                let request = GenerationRequest{
+                    messages: &messages,
+                    stringifier: SimpleStringifier,
+                    tx: &tx,
+                    system_prompt
+                };
+                let _ = generator.generate(request);
+            });
         });
         Ok(Box::pin(try_stream! {
             while let Some(result) = rx.recv().await {
