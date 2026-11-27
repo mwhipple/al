@@ -132,7 +132,7 @@ impl<S: Sinker> Runtime<S> {
     /// Accept `prompt` text and process it as a user message.
     pub async fn process_from_user(&mut self, prompt: &str) -> Result<()> {
         let msg = Message::user().with_text(prompt);
-        self.exec.append_message(msg);
+        self.exec.session().lock().unwrap().append_message(msg);
 
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
         let emitter = Emitter::new(tx, self.cancel.clone());

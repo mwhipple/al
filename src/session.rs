@@ -57,6 +57,9 @@ impl Session {
 /// This includes relatively immutable content,
 /// along with the Session that requires additional controls.
 ///
+/// This object itself should only provide methods that
+/// do not introduce mutability.
+///
 /// The provide will use a dynamic reference to match
 /// signatures in oi-kit
 pub struct ExecutionEnvironment {
@@ -81,11 +84,6 @@ impl ExecutionEnvironment {
                 id,
             })),
         }
-    }
-
-    /// Apply the provided `message` to the contained session.
-    pub fn append_message(&mut self, message: Message) {
-        self.session.lock().unwrap().append_message(message);
     }
 
     /// Provide the configured model config.
