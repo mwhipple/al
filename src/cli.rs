@@ -19,7 +19,7 @@
 //!
 //! A Sink receives output from the system, and therefore
 //! needs to be attached somewhere to be called.
-//! The trait is currently defined in [runtime] but documented
+//! The trait is currently defined in [Runtime] but documented
 //! here for cohesion with Input and to be alongside
 //! the active implementation.
 //!
